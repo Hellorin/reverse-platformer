@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saboteur - Reverse Platformer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>SABOTEUR</h1>
+            <div class="stats">
+                <span id="level">Level: 1</span>
+                <span id="points">Points: 100</span>
+                <span id="time">Time: 0.0s</span>
+                <span id="status">Click START to play</span>
+            </div>
+        </div>
+
+        <canvas id="gameCanvas" width="800" height="450"></canvas>
+
+        <div class="controls">
+            <div class="trap-buttons">
+                <button class="trap-btn" data-trap="SPIKE" data-cost="50" onclick="selectTrap('SPIKE', this)">
+                    Spike (50)
+                </button>
+                <button class="trap-btn" data-trap="BOUNCE_PAD" data-cost="20" onclick="selectTrap('BOUNCE_PAD', this)">
+                    Bounce (20)
+                </button>
+                <button class="trap-btn" data-trap="SLOW_ZONE" data-cost="15" onclick="selectTrap('SLOW_ZONE', this)">
+                    Slow (15)
+                </button>
+            </div>
+            <button id="startBtn" class="start-btn" onclick="startGame()">START</button>
+            <button id="nextLevelBtn" class="next-btn" onclick="nextLevel()" style="display: none;">NEXT LEVEL</button>
+        </div>
+
+        <div class="instructions">
+            <p><strong>Goal:</strong> Stop the runner from reaching the green goal!</p>
+            <p><strong>How:</strong> Select a trap, then click on the game area to place it.</p>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>

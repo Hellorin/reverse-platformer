@@ -1,0 +1,176 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #eee;
+}
+
+.game-container {
+    background: #0f0f1a;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.header h1 {
+    font-size: 2rem;
+    color: #ff6b6b;
+    text-transform: uppercase;
+    letter-spacing: 8px;
+    margin-bottom: 10px;
+}
+
+.stats {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    font-size: 1rem;
+}
+
+.stats span {
+    background: #1a1a2e;
+    padding: 8px 16px;
+    border-radius: 6px;
+}
+
+#points {
+    color: #ffd93d;
+}
+
+#time {
+    color: #6bcb77;
+}
+
+#status {
+    color: #4d96ff;
+}
+
+#gameCanvas {
+    display: block;
+    background: #1a1a2e;
+    border: 2px solid #333;
+    border-radius: 8px;
+    cursor: crosshair;
+}
+
+.controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    gap: 15px;
+}
+
+.trap-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.trap-btn {
+    padding: 12px 20px;
+    font-size: 0.9rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: bold;
+}
+
+.trap-btn[data-trap="SPIKE"] {
+    background: #ff6b6b;
+    color: white;
+}
+
+.trap-btn[data-trap="BOUNCE_PAD"] {
+    background: #4ecdc4;
+    color: white;
+}
+
+.trap-btn[data-trap="SLOW_ZONE"] {
+    background: #a855f7;
+    color: white;
+}
+
+.trap-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.trap-btn.selected {
+    outline: 3px solid #fff;
+    transform: scale(1.05);
+}
+
+.trap-btn.unaffordable {
+    opacity: 0.5;
+}
+
+.trap-btn.unaffordable::after {
+    content: ' (!)';
+}
+
+.start-btn {
+    padding: 12px 40px;
+    font-size: 1.1rem;
+    background: #6bcb77;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s;
+}
+
+.start-btn:hover {
+    background: #5ab868;
+    transform: translateY(-2px);
+}
+
+.next-btn {
+    padding: 12px 30px;
+    font-size: 1.1rem;
+    background: #4d96ff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s;
+}
+
+.next-btn:hover {
+    background: #3a7bd5;
+    transform: translateY(-2px);
+}
+
+#level {
+    color: #ff6b6b;
+    font-weight: bold;
+}
+
+.instructions {
+    margin-top: 15px;
+    text-align: center;
+    color: #888;
+    font-size: 0.9rem;
+}
+
+.instructions p {
+    margin: 5px 0;
+}
+
+/* Game over overlay styles are handled in JS via canvas */

@@ -19,6 +19,8 @@ body {
     border-radius: 12px;
     padding: 20px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    max-width: 95vw;
+    box-sizing: border-box;
 }
 
 .header {
@@ -65,6 +67,8 @@ body {
     border: 2px solid #333;
     border-radius: 8px;
     cursor: crosshair;
+    max-width: 100%;
+    height: auto;
 }
 
 .controls {
@@ -171,6 +175,79 @@ body {
 
 .instructions p {
     margin: 5px 0;
+}
+
+.keyhint {
+    font-size: 0.75em;
+    opacity: 0.6;
+    font-weight: normal;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 900px) {
+    .game-container {
+        padding: 15px;
+    }
+
+    .header h1 {
+        font-size: 1.5rem;
+        letter-spacing: 4px;
+    }
+
+    .stats {
+        gap: 15px;
+        font-size: 0.85rem;
+        flex-wrap: wrap;
+    }
+
+    .stats span {
+        padding: 6px 12px;
+    }
+
+    .controls {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .trap-buttons {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .trap-btn {
+        flex: 1;
+        padding: 10px;
+        font-size: 0.8rem;
+    }
+
+    .start-btn, .next-btn {
+        width: 100%;
+    }
+
+    .instructions {
+        font-size: 0.8rem;
+    }
+
+    .keyhint {
+        display: none;
+    }
+}
+
+@media (max-width: 500px) {
+    .header h1 {
+        font-size: 1.2rem;
+        letter-spacing: 2px;
+    }
+
+    .stats {
+        gap: 8px;
+        font-size: 0.75rem;
+    }
+
+    .trap-btn {
+        font-size: 0.75rem;
+        padding: 8px;
+    }
 }
 
 /* Game over overlay styles are handled in JS via canvas */

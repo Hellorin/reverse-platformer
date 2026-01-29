@@ -22,18 +22,18 @@
 
         <div class="controls">
             <div class="trap-buttons">
-                <button class="trap-btn" data-trap="SPIKE" data-cost="50" onclick="selectTrap('SPIKE', this)">
-                    Spike (50)
+                <button class="trap-btn" data-trap="SPIKE" data-cost="50">
+                    Spike (50) <span class="keyhint">[1]</span>
                 </button>
-                <button class="trap-btn" data-trap="BOUNCE_PAD" data-cost="20" onclick="selectTrap('BOUNCE_PAD', this)">
-                    Bounce (20)
+                <button class="trap-btn" data-trap="BOUNCE_PAD" data-cost="20">
+                    Bounce (20) <span class="keyhint">[2]</span>
                 </button>
-                <button class="trap-btn" data-trap="SLOW_ZONE" data-cost="15" onclick="selectTrap('SLOW_ZONE', this)">
-                    Slow (15)
+                <button class="trap-btn" data-trap="SLOW_ZONE" data-cost="15">
+                    Slow (15) <span class="keyhint">[3]</span>
                 </button>
             </div>
-            <button id="startBtn" class="start-btn" onclick="startGame()">START</button>
-            <button id="nextLevelBtn" class="next-btn" onclick="nextLevel()" style="display: none;">NEXT LEVEL</button>
+            <button id="startBtn" class="start-btn">START <span class="keyhint">[Space]</span></button>
+            <button id="nextLevelBtn" class="next-btn" style="display: none;">NEXT LEVEL</button>
         </div>
 
         <div class="instructions">

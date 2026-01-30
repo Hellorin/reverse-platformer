@@ -177,13 +177,13 @@ function send(message) {
 function startGame() {
     send({ type: 'START' });
     document.getElementById('startBtn').textContent = 'RESTART';
-    nextLevelBtn.style.display = 'none';
+    nextLevelBtn.classList.add('hidden');
 }
 
 // Next level
 function nextLevel() {
     send({ type: 'NEXT_LEVEL' });
-    nextLevelBtn.style.display = 'none';
+    nextLevelBtn.classList.add('hidden');
 }
 
 // Place trap
@@ -234,27 +234,27 @@ function updateUI() {
     switch (gameState.status) {
         case 'WAITING':
             statusDisplay.textContent = 'Click START to play';
-            nextLevelBtn.style.display = 'none';
+            nextLevelBtn.classList.add('hidden');
             break;
         case 'RUNNING':
             const speedPercent = Math.round(gameState.speedMultiplier * 100);
             statusDisplay.textContent = `Stop the runner! (Speed: ${speedPercent}%)`;
-            nextLevelBtn.style.display = 'none';
+            nextLevelBtn.classList.add('hidden');
             break;
         case 'PLAYER_WINS':
             if (gameState.level < MAX_LEVEL) {
                 statusDisplay.textContent = `Level ${gameState.level} complete!`;
-                nextLevelBtn.style.display = 'inline-block';
+                nextLevelBtn.classList.remove('hidden');
             } else {
                 statusDisplay.textContent = 'YOU BEAT ALL LEVELS!';
-                nextLevelBtn.style.display = 'none';
+                nextLevelBtn.classList.add('hidden');
             }
             startBtn.textContent = 'RESTART';
             break;
         case 'RUNNER_WINS':
             statusDisplay.textContent = 'Runner escaped! Try again.';
             startBtn.textContent = 'RETRY';
-            nextLevelBtn.style.display = 'none';
+            nextLevelBtn.classList.add('hidden');
             break;
     }
 
@@ -277,47 +277,128 @@ function render() {
         return;
     }
 
-    // Draw platforms
+    // Draw platforms with depth
     gameState.platforms.forEach(platform => {
         if (platform.active) {
-            ctx.fillStyle = COLORS.platform;
+            // Add shadow
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+            ctx.shadowBlur = 10;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 4;
+
+            // Draw platform with gradient
+            const platformGradient = ctx.createLinearGradient(
+                platform.x, platform.y,
+                platform.x, platform.y + platform.height
+            );
+            platformGradient.addColorStop(0, '#5a6578');
+            platformGradient.addColorStop(1, '#4a5568');
+            ctx.fillStyle = platformGradient;
             ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+
+            // Add highlight on top
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.fillRect(platform.x, platform.y, platform.width, 2);
         }
     });
 
-    // Draw goal
-    ctx.fillStyle = COLORS.goal;
+    // Reset shadow
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+
+    // Draw goal with glow
+    ctx.shadowColor = 'rgba(107, 203, 119, 0.8)';
+    ctx.shadowBlur = 30;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+
+    const goalGradient = ctx.createLinearGradient(
+        gameState.goal.x, gameState.goal.y,
+        gameState.goal.x, gameState.goal.y + gameState.goal.height
+    );
+    goalGradient.addColorStop(0, '#8bdb9d');
+    goalGradient.addColorStop(1, '#6bcb77');
+    ctx.fillStyle = goalGradient;
     ctx.fillRect(gameState.goal.x, gameState.goal.y, gameState.goal.width, gameState.goal.height);
+
+    // Add animated pulse border
+    const time = Date.now() / 1000;
+    const pulseAlpha = Math.sin(time * 3) * 0.3 + 0.7;
+    ctx.strokeStyle = `rgba(255, 255, 255, ${pulseAlpha})`;
+    ctx.lineWidth = 3;
+    ctx.strokeRect(gameState.goal.x, gameState.goal.y, gameState.goal.width, gameState.goal.height);
+
+    ctx.shadowBlur = 5;
     ctx.fillStyle = COLORS.white;
-    ctx.font = GAME_CONFIG.FONTS.GOAL_LABEL;
+    ctx.font = 'bold ' + GAME_CONFIG.FONTS.GOAL_LABEL;
     ctx.textAlign = 'center';
     ctx.fillText('GOAL', gameState.goal.x + gameState.goal.width / 2, gameState.goal.y + gameState.goal.height / 2 + 4);
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
 
     // Draw traps
     gameState.traps.forEach(trap => {
         drawTrap(trap);
     });
 
-    // Draw runner
+    // Draw runner with effects
     const runner = gameState.runner;
-    ctx.fillStyle = runner.alive ? COLORS.runner : COLORS.runnerDead;
+
+    if (runner.alive) {
+        // Add glow for alive runner
+        ctx.shadowColor = 'rgba(255, 107, 107, 0.8)';
+        ctx.shadowBlur = 20;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+
+        // Draw runner with gradient
+        const runnerGradient = ctx.createLinearGradient(
+            runner.x, runner.y,
+            runner.x, runner.y + GAME_CONFIG.RUNNER.HEIGHT
+        );
+        runnerGradient.addColorStop(0, '#ff8787');
+        runnerGradient.addColorStop(1, '#ff6b6b');
+        ctx.fillStyle = runnerGradient;
+    } else {
+        // Dead runner - no glow
+        ctx.shadowBlur = 5;
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+        ctx.fillStyle = COLORS.runnerDead;
+    }
+
     ctx.fillRect(runner.x, runner.y, GAME_CONFIG.RUNNER.WIDTH, GAME_CONFIG.RUNNER.HEIGHT);
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
 
     // Draw runner face
     if (runner.alive) {
+        // Eye with shine
         ctx.fillStyle = COLORS.white;
         ctx.fillRect(
             runner.x + GAME_CONFIG.RUNNER.EYE_OFFSET_X,
             runner.y + GAME_CONFIG.RUNNER.EYE_OFFSET_Y,
             GAME_CONFIG.RUNNER.EYE_SIZE,
             GAME_CONFIG.RUNNER.EYE_SIZE
-        ); // Eye
+        );
+
+        // Mouth with better shape
+        ctx.fillStyle = COLORS.white;
         ctx.fillRect(
             runner.x + GAME_CONFIG.RUNNER.MOUTH_OFFSET_X,
             runner.y + GAME_CONFIG.RUNNER.MOUTH_OFFSET_Y,
             GAME_CONFIG.RUNNER.MOUTH_WIDTH,
             GAME_CONFIG.RUNNER.MOUTH_HEIGHT
-        ); // Mouth
+        );
+
+        // Add highlight on runner body
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.fillRect(runner.x + 2, runner.y + 2, GAME_CONFIG.RUNNER.WIDTH - 4, 3);
     }
 
     // Draw game over overlay
@@ -337,22 +418,54 @@ function drawTrap(trap) {
 
     switch (trap.type) {
         case 'SPIKE':
-            ctx.fillStyle = COLORS.spike;
-            // Draw triangle spikes
+            // Add shadow
+            ctx.shadowColor = 'rgba(255, 107, 107, 0.5)';
+            ctx.shadowBlur = 15;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 4;
+
+            // Draw gradient triangle spikes
+            const spikeGradient = ctx.createLinearGradient(trap.x, trap.y, trap.x, trap.y + size);
+            spikeGradient.addColorStop(0, '#ff8787');
+            spikeGradient.addColorStop(1, '#ff6b6b');
+            ctx.fillStyle = spikeGradient;
+
             ctx.beginPath();
             ctx.moveTo(trap.x, trap.y + size);
             ctx.lineTo(trap.x + size / 2, trap.y);
             ctx.lineTo(trap.x + size, trap.y + size);
             ctx.closePath();
             ctx.fill();
+
+            // Add highlight
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(trap.x + size / 2, trap.y);
+            ctx.lineTo(trap.x + size * 0.3, trap.y + size * 0.6);
+            ctx.stroke();
             break;
 
         case 'BOUNCE_PAD':
-            ctx.fillStyle = COLORS.bouncePad;
+            // Add shadow
+            ctx.shadowColor = 'rgba(78, 205, 196, 0.5)';
+            ctx.shadowBlur = 15;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 4;
+
+            // Draw gradient bounce pad
+            const bounceGradient = ctx.createLinearGradient(trap.x, trap.y + size - 10, trap.x, trap.y + size);
+            bounceGradient.addColorStop(0, '#6ee7df');
+            bounceGradient.addColorStop(1, '#4ecdc4');
+            ctx.fillStyle = bounceGradient;
             ctx.fillRect(trap.x, trap.y + size - 10, size, 10);
-            // Draw spring lines
+
+            // Draw spring lines with glow
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = 'rgba(255, 255, 255, 0.8)';
             ctx.strokeStyle = COLORS.white;
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 2.5;
             ctx.beginPath();
             ctx.moveTo(trap.x + 5, trap.y + size - 5);
             ctx.lineTo(trap.x + 15, trap.y + size - 15);
@@ -361,13 +474,51 @@ function drawTrap(trap) {
             break;
 
         case 'SLOW_ZONE':
-            ctx.fillStyle = COLORS.slowZone + '80'; // Semi-transparent
+            // Add outer glow
+            ctx.shadowColor = 'rgba(168, 85, 247, 0.6)';
+            ctx.shadowBlur = 20;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+
+            // Draw gradient slow zone
+            const slowGradient = ctx.createRadialGradient(
+                trap.x + size / 2, trap.y + size / 2, 0,
+                trap.x + size / 2, trap.y + size / 2, size / 2
+            );
+            slowGradient.addColorStop(0, 'rgba(168, 85, 247, 0.6)');
+            slowGradient.addColorStop(1, 'rgba(168, 85, 247, 0.3)');
+            ctx.fillStyle = slowGradient;
             ctx.fillRect(trap.x, trap.y, size, size);
+
+            // Draw pulsing border
+            ctx.shadowBlur = 10;
             ctx.strokeStyle = COLORS.slowZone;
             ctx.lineWidth = 2;
             ctx.strokeRect(trap.x, trap.y, size, size);
+
+            // Draw inner pattern
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = 'rgba(168, 85, 247, 0.4)';
+            ctx.lineWidth = 1;
+            const lines = 4;
+            for (let i = 1; i < lines; i++) {
+                const offset = (size / lines) * i;
+                ctx.beginPath();
+                ctx.moveTo(trap.x + offset, trap.y);
+                ctx.lineTo(trap.x + offset, trap.y + size);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(trap.x, trap.y + offset);
+                ctx.lineTo(trap.x + size, trap.y + offset);
+                ctx.stroke();
+            }
             break;
     }
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
 }
 
 function drawTrapPreview(x, y, trapType, canAfford) {
@@ -398,48 +549,115 @@ function drawTrapPreview(x, y, trapType, canAfford) {
 }
 
 function drawWaitingScreen() {
+    // Draw title with glow effect
+    ctx.shadowColor = 'rgba(255, 107, 107, 0.8)';
+    ctx.shadowBlur = 30;
     ctx.fillStyle = COLORS.white;
-    ctx.font = GAME_CONFIG.FONTS.WAITING_TITLE;
+    ctx.font = 'bold 48px Orbitron, Arial';
     ctx.textAlign = 'center';
     ctx.fillText('SABOTEUR', canvas.width / 2, canvas.height / 2 - 20);
-    ctx.font = GAME_CONFIG.FONTS.WAITING_SUBTITLE;
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
+
+    // Draw subtitle
+    ctx.font = '20px Rajdhani, Arial';
     ctx.fillStyle = COLORS.gray;
     ctx.fillText('Click START to begin', canvas.width / 2, canvas.height / 2 + 20);
+
+    // Draw pulsing indicator
+    const time = Date.now() / 1000;
+    const pulseAlpha = Math.sin(time * 2) * 0.4 + 0.6;
+    ctx.fillStyle = `rgba(255, 107, 107, ${pulseAlpha})`;
+    ctx.font = '16px Rajdhani, Arial';
+    ctx.fillText('▼', canvas.width / 2, canvas.height / 2 + 50);
 }
 
 function drawGameOverOverlay() {
     const MAX_LEVEL = 5;
-    ctx.fillStyle = COLORS.overlayDark;
+
+    // Draw gradient overlay
+    const gradient = ctx.createRadialGradient(
+        canvas.width / 2, canvas.height / 2, 0,
+        canvas.width / 2, canvas.height / 2, canvas.width / 2
+    );
+    gradient.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
+    gradient.addColorStop(1, 'rgba(0, 0, 0, 0.9)');
+    ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.textAlign = 'center';
 
     if (gameState.status === 'PLAYER_WINS') {
+        // Victory state with glow
+        ctx.shadowColor = 'rgba(107, 203, 119, 1)';
+        ctx.shadowBlur = 40;
         ctx.fillStyle = COLORS.goal;
-        ctx.font = GAME_CONFIG.FONTS.GAME_OVER_TITLE;
+        ctx.font = 'bold 64px Orbitron, Arial';
 
         if (gameState.level >= MAX_LEVEL) {
             ctx.fillText('VICTORY!', canvas.width / 2, canvas.height / 2 - 40);
-            ctx.font = GAME_CONFIG.FONTS.GAME_OVER_SUBTITLE;
+
+            ctx.shadowBlur = 20;
+            ctx.font = '32px Rajdhani, Arial';
             ctx.fillStyle = COLORS.yellow;
             ctx.fillText(`You beat all ${MAX_LEVEL} levels!`, canvas.width / 2, canvas.height / 2 + 10);
-            ctx.font = GAME_CONFIG.FONTS.GAME_OVER_SMALL;
+
+            ctx.shadowBlur = 10;
+            ctx.font = 'bold 24px Rajdhani, Arial';
             ctx.fillStyle = COLORS.white;
             ctx.fillText(`Final Score: ${gameState.playerPoints}`, canvas.width / 2, canvas.height / 2 + 50);
+
+            // Draw stars for complete victory
+            ctx.shadowBlur = 15;
+            ctx.fillStyle = COLORS.yellow;
+            ctx.font = '40px Arial';
+            for (let i = 0; i < 5; i++) {
+                const x = canvas.width / 2 - 100 + i * 50;
+                const time = Date.now() / 1000;
+                const bounce = Math.sin(time * 3 + i) * 5;
+                ctx.fillText('★', x, canvas.height / 2 + 100 + bounce);
+            }
         } else {
             ctx.fillText(`LEVEL ${gameState.level} CLEAR!`, canvas.width / 2, canvas.height / 2 - 20);
-            ctx.font = GAME_CONFIG.FONTS.GAME_OVER_TEXT;
+
+            ctx.shadowBlur = 15;
+            ctx.font = '28px Rajdhani, Arial';
             ctx.fillStyle = COLORS.white;
             ctx.fillText('Click NEXT LEVEL to continue', canvas.width / 2, canvas.height / 2 + 30);
+
+            // Draw arrow indicator
+            const time = Date.now() / 1000;
+            const pulseAlpha = Math.sin(time * 3) * 0.4 + 0.6;
+            ctx.shadowBlur = 20;
+            ctx.fillStyle = `rgba(107, 203, 119, ${pulseAlpha})`;
+            ctx.font = '32px Arial';
+            ctx.fillText('▶', canvas.width / 2, canvas.height / 2 + 70);
         }
     } else {
+        // Defeat state with red glow
+        ctx.shadowColor = 'rgba(255, 107, 107, 1)';
+        ctx.shadowBlur = 40;
         ctx.fillStyle = COLORS.runner;
-        ctx.font = GAME_CONFIG.FONTS.GAME_OVER_TITLE;
+        ctx.font = 'bold 56px Orbitron, Arial';
         ctx.fillText('RUNNER ESCAPED!', canvas.width / 2, canvas.height / 2 - 20);
-        ctx.font = GAME_CONFIG.FONTS.GAME_OVER_TEXT;
+
+        ctx.shadowBlur = 15;
+        ctx.font = '28px Rajdhani, Arial';
         ctx.fillStyle = COLORS.white;
         ctx.fillText(`Level ${gameState.level} - Click RETRY`, canvas.width / 2, canvas.height / 2 + 30);
+
+        // Draw warning icon
+        const time = Date.now() / 1000;
+        const pulseAlpha = Math.sin(time * 3) * 0.3 + 0.7;
+        ctx.shadowBlur = 25;
+        ctx.fillStyle = `rgba(255, 107, 107, ${pulseAlpha})`;
+        ctx.font = 'bold 48px Arial';
+        ctx.fillText('⚠', canvas.width / 2, canvas.height / 2 + 80);
     }
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
 }
 
 // Canvas mouse listeners
@@ -528,3 +746,77 @@ function renderLoop() {
 // Initial render and connect
 renderLoop();
 connect();
+
+// Particle background effect
+const particlesCanvas = document.getElementById('particles');
+const particlesCtx = particlesCanvas.getContext('2d');
+
+particlesCanvas.width = window.innerWidth;
+particlesCanvas.height = window.innerHeight;
+
+window.addEventListener('resize', () => {
+    particlesCanvas.width = window.innerWidth;
+    particlesCanvas.height = window.innerHeight;
+});
+
+class Particle {
+    constructor() {
+        this.x = Math.random() * particlesCanvas.width;
+        this.y = Math.random() * particlesCanvas.height;
+        this.size = Math.random() * 2 + 1;
+        this.speedX = Math.random() * 0.5 - 0.25;
+        this.speedY = Math.random() * 0.5 - 0.25;
+        this.opacity = Math.random() * 0.5 + 0.2;
+    }
+
+    update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+
+        if (this.x < 0 || this.x > particlesCanvas.width) this.speedX *= -1;
+        if (this.y < 0 || this.y > particlesCanvas.height) this.speedY *= -1;
+    }
+
+    draw() {
+        particlesCtx.fillStyle = `rgba(255, 107, 107, ${this.opacity})`;
+        particlesCtx.beginPath();
+        particlesCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        particlesCtx.fill();
+    }
+}
+
+const particles = [];
+for (let i = 0; i < 80; i++) {
+    particles.push(new Particle());
+}
+
+function animateParticles() {
+    particlesCtx.clearRect(0, 0, particlesCanvas.width, particlesCanvas.height);
+
+    particles.forEach(particle => {
+        particle.update();
+        particle.draw();
+    });
+
+    // Draw connections between nearby particles
+    for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < 120) {
+                particlesCtx.strokeStyle = `rgba(255, 107, 107, ${0.1 * (1 - distance / 120)})`;
+                particlesCtx.lineWidth = 1;
+                particlesCtx.beginPath();
+                particlesCtx.moveTo(particles[i].x, particles[i].y);
+                particlesCtx.lineTo(particles[j].x, particles[j].y);
+                particlesCtx.stroke();
+            }
+        }
+    }
+
+    requestAnimationFrame(animateParticles);
+}
+
+animateParticles();
